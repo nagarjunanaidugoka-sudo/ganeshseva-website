@@ -50,7 +50,7 @@ function AppRoutes() {
   return (
     <DataProvider>
       <ContentProvider>
-             <BrowserRouter basename={window.location.hostname.includes(github.io) ? "/ganeshseva-website" : "/"}>
+             <BrowserRouter basename={window.location.hostname.includes("github.io") ? "/ganeshseva-website" : "/"}>
         <DeepLinkHandler />
         <Routes>
           <Route path="/admin/login" element={<AdminLoginPage />} />
