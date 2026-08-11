@@ -50,7 +50,7 @@ function AppRoutes() {
   return (
     <DataProvider>
       <ContentProvider>
-      <BrowserRouter>
+             <BrowserRouter basename="/ganeshseva-website">
         <DeepLinkHandler />
         <Routes>
           <Route path="/admin/login" element={<AdminLoginPage />} />
