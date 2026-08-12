@@ -30,7 +30,7 @@ export function Sidebar({
   adminMode?: boolean;
 }) {
   const { lang, session, isAdmin, signOut } = useApp();
-  const { Navigate = useNavigate();
+  const { Navigate } = useNavigate();
   const { settings } = useData();
   const { tc } = useContent();
   const loc = useLocation();
