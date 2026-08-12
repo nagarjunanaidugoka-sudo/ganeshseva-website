@@ -19,7 +19,7 @@ export function TopNav({ onMenu, adminMode = false }: { onMenu: () => void; admi
 
   async function handleSignOut() {
     await signOut();
-    navigate('/');
+    window.location.replace('/');
   }
 
   return (
