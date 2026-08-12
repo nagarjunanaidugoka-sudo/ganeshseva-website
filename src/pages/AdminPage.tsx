@@ -164,9 +164,6 @@ export function AdminPage() {
               <Icon className="w-4 h-4 text-saffron-600 shrink-0" />
               <span className="font-semibold text-maroon-800 dark:text-cream truncate">{currentTab.label}</span>
             </div>
-            <button onClick={signOut} className="ml-auto h-9 w-9 rounded-xl flex items-center justify-center bg-saffron-50 dark:bg-maroon-800 text-maroon-500 dark:text-cream/60">
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
 
           <div className="p-4 sm:p-6 lg:p-8">
@@ -181,9 +178,6 @@ export function AdminPage() {
                   <p className="text-xs text-maroon-400 dark:text-cream/50">Admin Panel</p>
                 </div>
               </div>
-              <button onClick={signOut} className="btn-outline px-4 py-2 text-sm flex items-center gap-2">
-                <LogOut className="w-4 h-4" /> Sign Out
-              </button>
             </div>
 
             {tab === 'home'              && <HomeManagementTab settings={data.settings} members={data.members} onRefresh={data.refresh} />}
