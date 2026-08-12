@@ -53,8 +53,6 @@ export function TopNav({ onMenu, adminMode = false }: { onMenu: () => void; admi
               <div className="h-9 w-9 rounded-full bg-saffron-gradient flex items-center justify-center text-white font-bold text-sm shadow-glow-saffron">
                 {initial}
               </div>
-              <button
-              </button>
             </div>
           ) : (
             <div className="h-9 w-9 rounded-full bg-saffron-100 dark:bg-maroon-800 flex items-center justify-center text-saffron-600 dark:text-cream/60 font-bold text-sm ml-1">
