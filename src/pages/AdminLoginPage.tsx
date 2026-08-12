@@ -217,17 +217,7 @@ export function AdminLoginPage() {
                 </span>
               )}
             </button>
-          </form>
-
-          {/* Default credentials hint (remove in production) */}
-          <div className="mt-5 p-3 rounded-lg bg-saffron-50 dark:bg-saffron-900/20 border border-saffron-200/60 dark:border-saffron-800/40">
-            <p className="text-xs text-maroon-600 dark:text-cream/60 text-center">
-              Default: <span className="font-mono font-semibold">admin@ganeshseva.in</span> / <span className="font-mono font-semibold">Admin@1234</span>
-            </p>
-            <p className="text-xs text-saffron-600 dark:text-saffron-400 text-center mt-1">
-              Please change your password after first sign-in.
-            </p>
-          </div>
+          </form>  
         </Card>
       </div>
     </div>
