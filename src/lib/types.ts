@@ -20,6 +20,7 @@ export interface Settings {
   email: string;
   address: string;
   whatsapp: string;
+  google_maps_url: string;
   bank_name: string;
   bank_account_name: string;
   bank_account_number: string;
