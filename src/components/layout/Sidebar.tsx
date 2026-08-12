@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, HandCoins, Receipt, Award, CalendarDays,
   Images, Phone, Home, X, ShieldCheck, LogOut,
@@ -30,6 +30,7 @@ export function Sidebar({
   adminMode?: boolean;
 }) {
   const { lang, session, isAdmin, signOut } = useApp();
+  const { Navigate = useNavigate();
   const { settings } = useData();
   const { tc } = useContent();
   const loc = useLocation();
@@ -101,7 +102,7 @@ export function Sidebar({
                 <span>{tc('nav.admin_panel', 'Admin Panel')}</span>
               </NavLink>
               <button
-                onClick={() => { signOut(); onClose(); }}
+                onClick={async () => { await signOut(); onClose(); navigate('/'); }}
                 className="nav-link nav-link-inactive w-full"
               >
                 <LogOut className="w-5 h-5 shrink-0" />
