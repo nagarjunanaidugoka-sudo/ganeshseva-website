@@ -18,6 +18,9 @@ export function ContentManagerTab() {
   const [historyKey, setHistoryKey] = useState<string | null>(null);
   const [versions, setVersions] = useState<ContentVersion[]>([]);
   const [restoringKey, setRestoringKey] = useState<string | null>(null);
+  const [mapsUrl, setMapsUrl] = useState('');
+  const [mapsSaving, setMapsSaving] = useState(false);
+  const [mapsSaved, setMapsSaved] = useState(false);
 
   const sections = useMemo(() => {
     const set = new Set<string>();
@@ -133,6 +136,65 @@ export function ContentManagerTab() {
   return (
     <div className="space-y-5">
       <SectionHeading
+        <Card>
+  <div className="space-y-3">
+    <div>
+      <h3 className="font-semibold text-maroon-800 dark:text-gold-200">
+        Google Maps Location
+      </h3>
+      <p className="text-xs text-maroon-500 dark:text-cream/60 mt-1">
+        Paste the Google Maps link for the committee location.
+      </p>
+    </div>
+
+    <input
+      value={mapsUrl}
+      onChange={e => setMapsUrl(e.target.value)}
+      placeholder="https://maps.google.com/..."
+      className="input"
+      type="url"
+    />
+
+    <button
+      type="button"
+      disabled={mapsSaving}
+      onClick={async () => {
+        setMapsSaving(true);
+        try {
+          await saveContent('contact.google_maps_url', mapsUrl, mapsUrl);
+          setMapsSaved(true);
+          setTimeout(() => setMapsSaved(false), 2500);
+        } catch (err) {
+          setSaveError(
+            err instanceof Error ? err.message : 'Failed to save Google Maps URL.'
+          );
+        } finally {
+          setMapsSaving(false);
+        }
+      }}
+      className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
+    >
+      {mapsSaving ? (
+        <>
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Saving...
+        </>
+      ) : (
+        <>
+          <Save className="w-4 h-4" />
+          Save Google Maps Location
+        </>
+      )}
+    </button>
+
+    {mapsSaved && (
+      <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+        <CheckCircle2 className="w-3.5 h-3.5" />
+        Google Maps location saved.
+      </p>
+    )}
+  </div>
+</Card>
         title="Content Management"
         subtitle="Edit all text shown on the website. Changes appear immediately after saving."
       />
