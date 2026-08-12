@@ -11,8 +11,8 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: false,
   },
   server: {
-    androidScheme: 'https',
-    cleartext: false,
+    androidScheme: 'http',
+    cleartext: true,
   },
   plugins: {
     SplashScreen: {
