@@ -10,6 +10,7 @@ export function ContactPage() {
   const { lang } = useApp();
   const { settings, loading } = useData();
   const { tc } = useContent();
+  const googleMapsUrl = tc('contact.google_maps_url', '');
 
   if (loading) return <Loader label={tc('common.loading', t('common.loading', lang))} />;
 
@@ -92,8 +93,24 @@ export function ContactPage() {
                 <MapPin className="w-8 h-8" />
               </div>
               <p className="font-display text-xl font-semibold text-maroon-800 dark:text-gold-200">Google Maps</p>
-              <p className="text-sm text-maroon-500 dark:text-cream/60 max-w-xs">Map integration will appear here. Showing {address || 'the committee location'}.</p>
-              <Badge color="saffron">Placeholder</Badge>
+
+<p className="text-sm text-maroon-500 dark:text-cream/60 max-w-xs">
+  {address || 'View the committee location on Google Maps'}
+</p>
+
+{googleMapsUrl ? (
+  <a
+    href={googleMapsUrl}
+    target="_blank"
+    rel="noreferrer"
+    className="btn-primary px-5 py-2.5"
+  >
+    <MapPin className="w-4 h-4" />
+    Open in Google Maps
+  </a>
+) : (
+  <Badge color="saffron">Location not configured</Badge>
+)}
             </div>
           </div>
         </Card>
