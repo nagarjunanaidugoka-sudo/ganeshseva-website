@@ -109,9 +109,20 @@ export function Sidebar({
               </button>
             </>
           )}
-          <p className="mt-3 text-center text-[10px] text-maroon-400 dark:text-cream/40">
-            © {new Date().getFullYear()} {committeeName}
-          </p>
+          <div className="mt-3 text-center">
+  {!adminMode && (
+    <NavLink
+      to="/admin/login"
+      onClick={onClose}
+      className="text-[11px] text-maroon-400 dark:text-cream/40 hover:text-saffron-600 dark:hover:text-saffron-400"
+    >
+      Admin Login
+    </NavLink>
+  )}
+  <p className="mt-2 text-[10px] text-maroon-400 dark:text-cream/40">
+    © {new Date().getFullYear()} {committeeName}
+  </p>
+</div>
         </div>
       </aside>
     </>
