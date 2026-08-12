@@ -35,13 +35,20 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Build Android AAB
+      - name: Build Android APK and AAB
         working-directory: android
-        run: ./gradlew bundleRelease
+        run: |
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ganeshseva-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: ganeshseva-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
-
