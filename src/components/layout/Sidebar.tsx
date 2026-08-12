@@ -102,7 +102,7 @@ export function Sidebar({
                 <span>{tc('nav.admin_panel', 'Admin Panel')}</span>
               </NavLink>
               <button
-                onClick={async () => { await signOut(); onClose(); navigate('/'); }}
+                onClick={async () => { await signOut(); onClose(); window.location.replace('/'); }}
                 className="nav-link nav-link-inactive w-full"
               >
                 <LogOut className="w-5 h-5 shrink-0" />
