@@ -1,4 +1,4 @@
-import { Menu, Moon, Sun, Languages, ShieldCheck, LogOut } from 'lucide-react';
+import { Menu, Moon, Sun, Languages, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/lib/store';
 import { useData } from '@/lib/data-context';
@@ -16,11 +16,6 @@ export function TopNav({ onMenu, adminMode = false }: { onMenu: () => void; admi
     : (settings?.committee_name || '');
   const village = settings?.village || '';
   const initial = session?.user?.email?.charAt(0).toUpperCase() ?? 'G';
-
-  async function handleSignOut() {
-    await signOut();
-    window.location.replace('/');
-  }
 
   return (
     <header className="sticky top-0 z-30 glass border-b border-saffron-200/50 dark:border-maroon-800">
@@ -59,11 +54,6 @@ export function TopNav({ onMenu, adminMode = false }: { onMenu: () => void; admi
                 {initial}
               </div>
               <button
-                onClick={handleSignOut}
-                className="btn-ghost h-9 px-3 rounded-lg text-sm text-maroon-600 dark:text-cream/70 hidden sm:flex"
-                title="Sign out"
-              >
-                <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
