@@ -406,6 +406,12 @@ export function ContentManagerTab() {
     </>
   )}
 </button>
+      {savedKey === 'social' && (
+  <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1 justify-end mt-2">
+    <CheckCircle2 className="w-3.5 h-3.5" />
+    Social media links saved successfully.
+  </p>
+)}
     </div>
   </div>
 </Card>
