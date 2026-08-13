@@ -31,6 +31,12 @@ export function ContentManagerTab() {
   const [mapsUrl, setMapsUrl] = useState('');
   const [mapsSaving, setMapsSaving] = useState(false);
   const [mapsSaved, setMapsSaved] = useState(false);
+  
+  const socialDefaults = {
+  whatsapp: 'https://chat.whatsapp.com/ElWzFIfhhaG6359mMTeHX7?s=cl&p=a&mlu=4',
+  instagram: 'https://www.instagram.com/vinayaka_temple_dandagarra?igsh=MW53d3I3c3U2ZzcyaQ==',
+  facebook: 'https://www.facebook.com/share/g/1Dk6xYjJAN/',
+};
 
   // Load saved Google Maps URL
   useEffect(() => {
@@ -278,6 +284,74 @@ export function ContentManagerTab() {
         title="Content Management"
         subtitle="Edit all text shown on the website. Changes appear immediately after saving."
       />
+      <Card>
+  <div className="space-y-4">
+    <div>
+      <h3 className="font-semibold text-maroon-800 dark:text-gold-200">
+        Social Media & WhatsApp
+      </h3>
+      <p className="text-xs text-maroon-500 dark:text-cream/60 mt-1">
+        Update the links visitors can use to join and follow the festival.
+      </p>
+    </div>
+
+    <div className="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label className="label">WhatsApp Group URL</label>
+        <input
+          className="input"
+          type="url"
+          value={getDraft('social.whatsapp_group').en || socialDefaults.whatsapp}
+          onChange={e =>
+            setDraft('social.whatsapp_group', 'en', e.target.value)
+          }
+          placeholder="https://chat.whatsapp.com/..."
+        />
+      </div>
+
+      <div>
+        <label className="label">Instagram URL</label>
+        <input
+          className="input"
+          type="url"
+          value={getDraft('social.instagram').en || socialDefaults.instagram}
+          onChange={e =>
+            setDraft('social.instagram', 'en', e.target.value)
+          }
+          placeholder="https://www.instagram.com/..."
+        />
+      </div>
+
+      <div>
+        <label className="label">Facebook URL</label>
+        <input
+          className="input"
+          type="url"
+          value={getDraft('social.facebook').en || socialDefaults.facebook}
+          onChange={e =>
+            setDraft('social.facebook', 'en', e.target.value)
+          }
+          placeholder="https://www.facebook.com/..."
+        />
+      </div>
+    </div>
+
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={async () => {
+          await handleSave('social.whatsapp_group');
+          await handleSave('social.instagram');
+          await handleSave('social.facebook');
+        }}
+        className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
+      >
+        <Save className="w-4 h-4" />
+        Save Social Links
+      </button>
+    </div>
+  </div>
+</Card>
 
       {/* Google Maps Location */}
       <Card>
