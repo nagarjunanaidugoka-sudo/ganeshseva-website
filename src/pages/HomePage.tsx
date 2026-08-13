@@ -373,9 +373,7 @@ const facebookUrl = tc(
 </div>
           </Card>
         </section>
-      )}
-      
-      </section>
+      )} 
 
       {/* ANNOUNCEMENTS */}
       <section>
@@ -429,6 +427,7 @@ const facebookUrl = tc(
             </a>
           </div>
         </Card>
+       </section>
     </div>
   );
 }
