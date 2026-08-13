@@ -414,7 +414,7 @@ const facebookUrl = tc(
           />
           <div className="flex flex-wrap gap-3">
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
+              <Whatsapp className="w-4 h-4" />
               Join WhatsApp Group
             </a>
             <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2">
