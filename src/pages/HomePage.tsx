@@ -77,7 +77,8 @@ const facebookUrl = tc(
 
   const cd = useCountdown(settings?.festival_date ?? null);
   const td = totalDonations(donations);
-  const totalExpenses = expenses.reduce( (sum, expense) => sum + Number(expense.amount || 0),
+  const totalExpenses = expenses.reduce(
+    (sum, expense) => sum + Number(expense.amount || 0),
     0
   );
   const goal = settings?.donation_goal ?? 0;
@@ -369,80 +370,34 @@ const facebookUrl = tc(
     <Phone className="w-4 h-4" />
     {tc('home.contact_us_btn', 'Contact Us')}
   </Link>
-
-  {true && (
-    <a
-      href={whatsappUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2"
-    >
-      <MessageCircle className="w-4 h-4" />
-      Join WhatsApp Group
-    </a>
-  )}
-
-  {true && (
-    <a
-      href={instagramUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
-    >
-      <Instagram className="w-4 h-4" />
-      Instagram
-    </a>
-  )}
-
-  {true && (
-    <a
-      href={facebookUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
-    >
-      <Facebook className="w-4 h-4" />
-      Facebook
-    </a>
-  )}
 </div>
           </Card>
         </section>
       )}
-{/* SOCIAL MEDIA & WHATSAPP */}
+      {/* SOCIAL MEDIA */}
       <section>
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="https://chat.whatsapp.com/ElWzFIfhhaG6359mMTeHX7?s=cl&p=a&mlu=4"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2"
-          >
-            <MessageCircle className="w-4 h-4" />
-            Join WhatsApp Group
-          </a>
-
-          <a
-            href="https://www.instagram.com/vinayaka_temple_dandagarra?igsh=MW53d3I3c3U2ZzcyaQ=="
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
-          >
-            <Instagram className="w-4 h-4" />
-            Instagram
-          </a>
-
-          <a
-            href="https://www.facebook.com/share/g/1Dk6xYjJAN/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
-          >
-            <Facebook className="w-4 h-4" />
-            Facebook
-          </a>
-        </div>
+        <Card>
+          <SectionHeading
+            title="Connect With Us"
+            subtitle="Join our WhatsApp group and follow us on social media"
+          />
+          <div className="flex flex-wrap gap-3">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Join WhatsApp Group
+            </a>
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2">
+              <Instagram className="w-4 h-4" />
+              Instagram
+            </a>
+            <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2">
+              <Facebook className="w-4 h-4" />
+              Facebook
+            </a>
+          </div>
+        </Card>
       </section>
+
       {/* ANNOUNCEMENTS */}
       <section>
         <SectionHeading
