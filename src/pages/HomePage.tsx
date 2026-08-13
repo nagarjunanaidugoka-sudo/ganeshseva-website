@@ -370,7 +370,7 @@ const facebookUrl = tc(
     {tc('home.contact_us_btn', 'Contact Us')}
   </Link>
 
-  {whatsappUrl && (
+  {true && (
     <a
       href={whatsappUrl}
       target="_blank"
@@ -382,7 +382,7 @@ const facebookUrl = tc(
     </a>
   )}
 
-  {instagramUrl && (
+  {true && (
     <a
       href={instagramUrl}
       target="_blank"
@@ -394,7 +394,7 @@ const facebookUrl = tc(
     </a>
   )}
 
-  {facebookUrl && (
+  {true && (
     <a
       href={facebookUrl}
       target="_blank"
