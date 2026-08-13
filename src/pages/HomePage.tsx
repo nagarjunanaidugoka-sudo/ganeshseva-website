@@ -10,6 +10,9 @@ import {
   MapPin,
   Phone,
   Users,
+  MessageCircle,
+  Instagram,
+  Facebook,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { useData, totalDonations } from '@/lib/data-context';
@@ -56,7 +59,9 @@ export function HomePage() {
   const { lang } = useApp();
   const { settings, members, sponsors, events, announcements, gallery, donations, expenses, loading } = useData();
   const { tc } = useContent();
-
+  const whatsappUrl = tc('social.whatsapp_group', '');
+  const instagramUrl = tc('social.instagram', '');
+  const facebookUrl = tc('social.facebook', '');
   if (loading) return <Loader label={tc('common.loading', t('common.loading', lang))} />;
 
   const cd = useCountdown(settings?.festival_date ?? null);
@@ -349,10 +354,47 @@ export function HomePage() {
               ))}
             </div>
             <div className="relative mt-5 flex flex-wrap gap-3">
-              <Link to="/contact" className="btn-outline px-5 py-2.5 text-sm">
-                <Phone className="w-4 h-4" /> {tc('home.contact_us_btn', 'Contact Us')}
-              </Link>
-            </div>
+  <Link to="/contact" className="btn-outline px-5 py-2.5 text-sm">
+    <Phone className="w-4 h-4" />
+    {tc('home.contact_us_btn', 'Contact Us')}
+  </Link>
+
+  {whatsappUrl && (
+    <a
+      href={whatsappUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2"
+    >
+      <MessageCircle className="w-4 h-4" />
+      Join WhatsApp Group
+    </a>
+  )}
+
+  {instagramUrl && (
+    <a
+      href={instagramUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
+    >
+      <Instagram className="w-4 h-4" />
+      Instagram
+    </a>
+  )}
+
+  {facebookUrl && (
+    <a
+      href={facebookUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2"
+    >
+      <Facebook className="w-4 h-4" />
+      Facebook
+    </a>
+  )}
+</div>
           </Card>
         </section>
       )}
