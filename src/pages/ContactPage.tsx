@@ -75,7 +75,7 @@ export function ContactPage() {
 </p>
 
 <p className="text-lg font-medium text-maroon-800 dark:text-gold-200">
-  {tc('contact.hours', '6:00 AM – 10:00 PM (9 days)')}
+  {tc('contact.hours', '6:00 AM – 10:00 PM')}
 </p>
               </div>
             </div>
