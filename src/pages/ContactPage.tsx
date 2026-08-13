@@ -70,8 +70,13 @@ export function ContactPage() {
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-maroon-500 dark:text-cream/60 font-semibold">Festival Hours</p>
-                <p className="text-lg font-medium text-maroon-800 dark:text-gold-200">6:00 AM – 10:00 PM (9 days)</p>
+                <p className="text-xs uppercase tracking-wide text-maroon-500 dark:text-cream/60 font-semibold">
+  Contact Hours
+</p>
+
+<p className="text-lg font-medium text-maroon-800 dark:text-gold-200">
+  {tc('contact.hours', '6:00 AM – 10:00 PM (9 days)')}
+</p>
               </div>
             </div>
 
