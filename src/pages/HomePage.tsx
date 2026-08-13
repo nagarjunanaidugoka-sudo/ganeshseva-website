@@ -59,9 +59,20 @@ export function HomePage() {
   const { lang } = useApp();
   const { settings, members, sponsors, events, announcements, gallery, donations, expenses, loading } = useData();
   const { tc } = useContent();
-  const whatsappUrl = tc('social.whatsapp_group', '');
-  const instagramUrl = tc('social.instagram', '');
-  const facebookUrl = tc('social.facebook', '');
+  const whatsappUrl = tc(
+  'social.whatsapp_group',
+  'https://chat.whatsapp.com/ElWzFIfhhaG6359mMTeHX7?s=cl&p=a&mlu=4'
+);
+
+const instagramUrl = tc(
+  'social.instagram',
+  'https://www.instagram.com/vinayaka_temple_dandagarra?igsh=MW53d3I3c3U2ZzcyaQ=='
+);
+
+const facebookUrl = tc(
+  'social.facebook',
+  'https://www.facebook.com/share/g/1Dk6xYjJAN/'
+);
   if (loading) return <Loader label={tc('common.loading', t('common.loading', lang))} />;
 
   const cd = useCountdown(settings?.festival_date ?? null);
