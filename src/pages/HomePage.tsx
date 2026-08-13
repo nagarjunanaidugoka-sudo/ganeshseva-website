@@ -61,7 +61,7 @@ export function HomePage() {
 
   const cd = useCountdown(settings?.festival_date ?? null);
   const td = totalDonations(donations);
-  const totalExpenses = expences.reduce((sum, expense) => sum + Number(expense.amount || 0)),
+  const totalExpenses = expenses.reduce( (sum, expense) => sum + Number(expense.amount || 0),
     0
   );
   const goal = settings?.donation_goal ?? 0;
