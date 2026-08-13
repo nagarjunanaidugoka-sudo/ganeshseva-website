@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   HandCoins,
-  Wallet,
+  Receipt,
   ArrowRight,
   CalendarDays,
   Sparkles,
@@ -12,7 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
-import { useData, totalDonations, currentBalance } from '@/lib/data-context';
+import { useData, totalDonations } from '@/lib/data-context';
 import { t } from '@/lib/i18n';
 import { useContent } from '@/lib/content-context';
 import { formatINR, formatDate, timeAgo } from '@/lib/format';
@@ -61,11 +61,13 @@ export function HomePage() {
 
   const cd = useCountdown(settings?.festival_date ?? null);
   const td = totalDonations(donations);
-  const bal = currentBalance(donations, expenses);
+  const totalExpenses = expences.reduce((sum, expense) => sum + Number(expense.amount || 0)),
+    0
+  );
   const goal = settings?.donation_goal ?? 0;
   const goalPct = goal > 0 ? Math.round((td / goal) * 100) : 0;
   const liveTotal = useCountUp(td);
-  const balance = useCountUp(bal);
+  const expensesTotal = useCountUp(totalExpenses);
 
   const committeeName = lang === 'te' ? (settings?.committee_name_te || settings?.committee_name || '') : (settings?.committee_name || '');
   const village = settings?.village || '';
@@ -175,45 +177,74 @@ export function HomePage() {
         </section>
       )}
 
-      {/* LIVE DONATION + BALANCE */}
-      <section className="grid sm:grid-cols-2 gap-5">
-        <Card hover className="relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-24 h-24 text-saffron-300/30">
-            <Marigold className="w-full h-full" />
-          </div>
-          <div className="flex items-center gap-2 text-maroon-500 dark:text-cream/60">
-            <HandCoins className="w-5 h-5 text-saffron-500" />
-            <p className="text-xs font-semibold uppercase tracking-wide">{tc('home.live_donations_label', t('home.liveDonations', lang))}</p>
-            <span className="ml-auto flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-semibold">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" /> LIVE
-            </span>
-          </div>
-          <p className="mt-2 font-display text-3xl md:text-4xl font-bold text-gradient-saffron">{formatINR(liveTotal)}</p>
-          {goal > 0 && (
-            <div className="mt-4">
-              <div className="flex justify-between text-xs text-maroon-500 dark:text-cream/60 mb-1.5">
-                <span>{tc('home.goal_label', 'Goal')}: {formatINR(goal)}</span>
-                <span className="font-semibold">{goalPct}%</span>
-              </div>
-              <ProgressBar value={td} max={goal} />
-            </div>
-          )}
-        </Card>
+      {/* LIVE DONATION + EXPENSES */}
+<section className="grid sm:grid-cols-2 gap-5">
 
-        <Card hover className="relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-24 h-24 text-gold-300/30">
-            <Lotus className="w-full h-full" />
+  {/* Live Donations */}
+  <Link to="/donations" className="block group">
+    <Card hover className="relative overflow-hidden cursor-pointer transition-transform group-hover:-translate-y-1">
+      <div className="absolute -right-6 -top-6 w-24 h-24 text-saffron-300/30">
+        <Marigold className="w-full h-full" />
+      </div>
+
+      <div className="flex items-center gap-2 text-maroon-500 dark:text-cream/60">
+        <HandCoins className="w-5 h-5 text-saffron-500" />
+
+        <p className="text-xs font-semibold uppercase tracking-wide">
+          {tc('home.live_donations_label', t('home.liveDonations', lang))}
+        </p>
+
+        <span className="ml-auto flex items-center gap-1 text-[10px] text-green-600 dark:text-green-400 font-semibold">
+          <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+          LIVE
+        </span>
+      </div>
+
+      <p className="mt-2 font-display text-3xl md:text-4xl font-bold text-gradient-saffron">
+        {formatINR(liveTotal)}
+      </p>
+
+      {goal > 0 && (
+        <div className="mt-4">
+          <div className="flex justify-between text-xs text-maroon-500 dark:text-cream/60 mb-1.5">
+            <span>
+              {tc('home.goal_label', 'Goal')}: {formatINR(goal)}
+            </span>
+            <span className="font-semibold">{goalPct}%</span>
           </div>
-          <div className="flex items-center gap-2 text-maroon-500 dark:text-cream/60">
-            <Wallet className="w-5 h-5 text-gold-500" />
-            <p className="text-xs font-semibold uppercase tracking-wide">{tc('home.balance_label', t('home.availableBalance', lang))}</p>
-          </div>
-          <p className="mt-2 font-display text-3xl md:text-4xl font-bold text-gradient-gold">{formatINR(balance)}</p>
-          <p className="mt-4 text-xs text-maroon-500 dark:text-cream/60">
-            {tc('home.balance_description', 'Donations minus expenses. Funds available for festival arrangements.')}
-          </p>
-        </Card>
-      </section>
+
+          <ProgressBar value={td} max={goal} />
+        </div>
+      )}
+    </Card>
+  </Link>
+
+  {/* Expenses */}
+  <Link to="/expenses" className="block group">
+    <Card hover className="relative overflow-hidden cursor-pointer transition-transform group-hover:-translate-y-1">
+      <div className="absolute -right-6 -top-6 w-24 h-24 text-red-300/30">
+        <Receipt className="w-full h-full" />
+      </div>
+
+      <div className="flex items-center gap-2 text-maroon-500 dark:text-cream/60">
+        <Receipt className="w-5 h-5 text-red-500" />
+
+        <p className="text-xs font-semibold uppercase tracking-wide">
+          Expenses
+        </p>
+      </div>
+
+      <p className="mt-2 font-display text-3xl md:text-4xl font-bold text-gradient-gold">
+        {formatINR(expensesTotal)}
+      </p>
+
+      <p className="mt-4 text-xs text-maroon-500 dark:text-cream/60">
+        Total festival expenses
+      </p>
+    </Card>
+  </Link>
+
+</section>
 
       {/* EVENT HIGHLIGHTS */}
       <section>
