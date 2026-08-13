@@ -413,7 +413,7 @@ const facebookUrl = tc(
             subtitle="Join our WhatsApp group and follow us on social media"
           />
           <div className="flex flex-wrap gap-3">
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-primary px-5 py-2.5 text-sm flex items-center gap-2">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn-outline px-5 py-2.5 text-sm flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
               Join WhatsApp Group
             </a>
