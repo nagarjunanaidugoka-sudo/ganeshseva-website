@@ -338,17 +338,74 @@ export function ContentManagerTab() {
 
     <div className="flex justify-end">
       <button
-        type="button"
-        onClick={async () => {
-          await handleSave('social.whatsapp_group');
-          await handleSave('social.instagram');
-          await handleSave('social.facebook');
-        }}
-        className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
-      >
-        <Save className="w-4 h-4" />
-        Save Social Links
-      </button>
+  type="button"
+  disabled={savingKey === 'social'}
+  onClick={async () => {
+    setSavingKey('social');
+    setSaveError(null);
+
+    try {
+      const whatsapp =
+        getDraft('social.whatsapp_group').en || socialDefaults.whatsapp;
+
+      const instagram =
+        getDraft('social.instagram').en || socialDefaults.instagram;
+
+      const facebook =
+        getDraft('social.facebook').en || socialDefaults.facebook;
+
+      await saveContent(
+        'social.whatsapp_group',
+        whatsapp,
+        whatsapp
+      );
+
+      await saveContent(
+        'social.instagram',
+        instagram,
+        instagram
+      );
+
+      await saveContent(
+        'social.facebook',
+        facebook,
+        facebook
+      );
+
+      setDrafts(prev => {
+        const next = { ...prev };
+        delete next['social.whatsapp_group'];
+        delete next['social.instagram'];
+        delete next['social.facebook'];
+        return next;
+      });
+
+      setSavedKey('social');
+      setTimeout(() => setSavedKey(null), 2500);
+    } catch (err) {
+      setSaveError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to save social media links.'
+      );
+    } finally {
+      setSavingKey(null);
+    }
+  }}
+  className="btn-primary px-4 py-2.5 text-sm flex items-center gap-2"
+>
+  {savingKey === 'social' ? (
+    <>
+      <Loader2 className="w-4 h-4 animate-spin" />
+      Saving...
+    </>
+  ) : (
+    <>
+      <Save className="w-4 h-4" />
+      Save Social Links
+    </>
+  )}
+</button>
     </div>
   </div>
 </Card>
