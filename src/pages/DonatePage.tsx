@@ -1,8 +1,18 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  QrCode, Copy, Check, HandCoins, ArrowLeft, CheckCircle2,
-  AlertCircle, Smartphone, ShieldCheck, X, ImageIcon, Loader2,
+  QrCode,
+  Copy,
+  Check,
+  HandCoins,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  Smartphone,
+  ShieldCheck,
+  X,
+  ImageIcon,
+  Loader2,
 } from 'lucide-react';
 import { useApp } from '@/lib/store';
 import { useData } from '@/lib/data-context';
@@ -50,51 +60,175 @@ export function DonatePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (loading) {
-    return <Loader label={tc('common.loading', t('common.loading', lang))} />;
+    return (
+      <Loader
+        label={tc('common.loading', t('common.loading', lang))}
+      />
+    );
   }
 
-  const upiId = settings?.upi_id || 'nagarjuna.goka@ybl';
+  const upiId = settings?.upi_id || '';
   const upiQr = settings?.upi_qr_url || '';
   const committeeName =
-    settings?.committee_name || tc('app.name', t('appName', lang));
+    settings?.committee_name ||
+    tc('app.name', t('appName', lang));
 
-  function copyUpiId() {
-    if (!upiId) return;
+  /*
+   * ------------------------------------------------------------
+   * UPI PAYMENT FUNCTIONS
+   * ------------------------------------------------------------
+   */
 
-    navigator.clipboard.writeText(upiId).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  function payNow() {
+  function getPaymentAmount(): number | null {
     const amount = Number(form.amount);
 
-    if (!form.amount || !Number.isFinite(amount) || amount <= 0) {
-      setErrors(prev => ({
+    if (
+      !form.amount ||
+      !Number.isFinite(amount) ||
+      amount <= 0
+    ) {
+      setErrors((prev) => ({
         ...prev,
         amount: 'Enter a valid donation amount first',
       }));
-      return;
+
+      return null;
     }
 
-    setErrors(prev => {
+    setErrors((prev) => {
       const next = { ...prev };
       delete next.amount;
       return next;
     });
 
-    const params = new URLSearchParams({
-      pa: upiId,
-      pn: committeeName,
-      am: amount.toFixed(2),
-      cu: 'INR',
-    });
-
-    window.location.href = `upi://pay?${params.toString()}`;
+    return amount;
   }
 
-  function validate(f: SubmitForm): Record<string, string> {
+  function createUpiUrl(amount: number): string {
+    return (
+      `upi://pay?pa=${encodeURIComponent(upiId)}` +
+      `&pn=${encodeURIComponent(committeeName)}` +
+      `&am=${encodeURIComponent(amount.toFixed(2))}` +
+      `&cu=INR`
+    );
+  }
+
+  function payWithUPI() {
+    const amount = getPaymentAmount();
+
+    if (amount === null) return;
+
+    if (!upiId) {
+      setSubmitError('UPI ID is not configured.');
+      return;
+    }
+
+    window.location.href = createUpiUrl(amount);
+  }
+
+  function payWithPhonePe() {
+    const amount = getPaymentAmount();
+
+    if (amount === null) return;
+
+    if (!upiId) {
+      setSubmitError('UPI ID is not configured.');
+      return;
+    }
+
+    const intentUrl =
+      `intent://pay?pa=${encodeURIComponent(upiId)}` +
+      `&pn=${encodeURIComponent(committeeName)}` +
+      `&am=${encodeURIComponent(amount.toFixed(2))}` +
+      `&cu=INR` +
+      `#Intent;scheme=upi;package=com.phonepe.app;end`;
+
+    window.location.href = intentUrl;
+  }
+
+  function payWithGooglePay() {
+    const amount = getPaymentAmount();
+
+    if (amount === null) return;
+
+    if (!upiId) {
+      setSubmitError('UPI ID is not configured.');
+      return;
+    }
+
+    const intentUrl =
+      `intent://pay?pa=${encodeURIComponent(upiId)}` +
+      `&pn=${encodeURIComponent(committeeName)}` +
+      `&am=${encodeURIComponent(amount.toFixed(2))}` +
+      `&cu=INR` +
+      `#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+
+    window.location.href = intentUrl;
+  }
+
+  function payWithPaytm() {
+    const amount = getPaymentAmount();
+
+    if (amount === null) return;
+
+    if (!upiId) {
+      setSubmitError('UPI ID is not configured.');
+      return;
+    }
+
+    const intentUrl =
+      `intent://pay?pa=${encodeURIComponent(upiId)}` +
+      `&pn=${encodeURIComponent(committeeName)}` +
+      `&am=${encodeURIComponent(amount.toFixed(2))}` +
+      `&cu=INR` +
+      `#Intent;scheme=upi;package=net.one97.paytm;end`;
+
+    window.location.href = intentUrl;
+  }
+
+  function scrollToQr() {
+    const qrSection = document.getElementById(
+      'upi-qr-section'
+    );
+
+    qrSection?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * COPY UPI ID
+   * ------------------------------------------------------------
+   */
+
+  function copyUpiId() {
+    if (!upiId) return;
+
+    navigator.clipboard
+      .writeText(upiId)
+      .then(() => {
+        setCopied(true);
+
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      })
+      .catch(() => {
+        setSubmitError('Could not copy UPI ID. Please copy it manually.');
+      });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * FORM VALIDATION
+   * ------------------------------------------------------------
+   */
+
+  function validate(
+    f: SubmitForm
+  ): Record<string, string> {
     const errs: Record<string, string> = {};
 
     if (!f.donor_name.trim()) {
@@ -105,102 +239,188 @@ export function DonatePage() {
       errs.amount = 'Amount must be greater than 0';
     }
 
-    if (f.phone && !/^[0-9+\-\s]{6,15}$/.test(f.phone)) {
+    if (
+      f.phone &&
+      !/^[0-9+\-\s]{6,15}$/.test(f.phone)
+    ) {
       errs.phone = 'Enter a valid phone number';
     }
 
     if (!f.transaction_id.trim()) {
-      errs.transaction_id = 'Transaction ID is required';
+      errs.transaction_id =
+        'Transaction ID is required';
     }
 
     if (!f.payment_date) {
-      errs.payment_date = 'Payment date is required';
+      errs.payment_date =
+        'Payment date is required';
     }
 
     return errs;
   }
 
+  /*
+   * ------------------------------------------------------------
+   * SCREENSHOT UPLOAD
+   * ------------------------------------------------------------
+   */
+
   async function handleScreenshot(file: File) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file (JPG, PNG, or WebP).');
+      setUploadError(
+        'Please select an image file (JPG, PNG, or WebP).'
+      );
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image must be smaller than 5 MB.');
+      setUploadError(
+        'Image must be smaller than 5 MB.'
+      );
       return;
     }
 
     setUploadError('');
     setUploading(true);
 
-    const ext = file.name.split('.').pop() ?? 'jpg';
-    const filename =
-      `donations/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    try {
+      const ext =
+        file.name.split('.').pop() ?? 'jpg';
 
-    const { data, error: uploadErr } = await supabase.storage
-      .from('image-uploads')
-      .upload(filename, file, {
-        upsert: true,
-        contentType: file.type,
-      });
+      const filename =
+        `donations/${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}.${ext}`;
 
-    if (uploadErr || !data) {
-      setUploadError(uploadErr?.message ?? 'Upload failed. Please try again.');
+      const { data, error: uploadErr } =
+        await supabase.storage
+          .from('image-uploads')
+          .upload(
+            filename,
+            file,
+            {
+              upsert: true,
+              contentType: file.type,
+            }
+          );
+
+      if (uploadErr || !data) {
+        setUploadError(
+          uploadErr?.message ??
+            'Upload failed. Please try again.'
+        );
+
+        setUploading(false);
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } =
+        supabase.storage
+          .from('image-uploads')
+          .getPublicUrl(data.path);
+
+      setForm((f) => ({
+        ...f,
+        screenshot_url: publicUrl,
+      }));
+
       setUploading(false);
-      return;
+    } catch {
+      setUploadError(
+        'Upload failed. Please try again.'
+      );
+
+      setUploading(false);
     }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage
-      .from('image-uploads')
-      .getPublicUrl(data.path);
-
-    setForm(f => ({ ...f, screenshot_url: publicUrl }));
-    setUploading(false);
   }
 
   function removeScreenshot() {
-    setForm(f => ({ ...f, screenshot_url: null }));
+    setForm((f) => ({
+      ...f,
+      screenshot_url: null,
+    }));
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  /*
+   * ------------------------------------------------------------
+   * SUBMIT PAYMENT DETAILS
+   * ------------------------------------------------------------
+   */
+
+  async function handleSubmit(
+    e: React.FormEvent
+  ) {
     e.preventDefault();
 
     const errs = validate(form);
+
     setErrors(errs);
 
-    if (Object.keys(errs).length) return;
+    if (Object.keys(errs).length) {
+      return;
+    }
 
     setSubmitting(true);
     setSubmitError('');
 
     try {
-      const { data, error } = await supabase.rpc('submit_public_donation', {
-        p_donor_name: form.donor_name.trim(),
-        p_phone: form.phone.trim(),
-        p_amount: Number(form.amount),
-        p_transaction_id: form.transaction_id.trim(),
-        p_payment_date: form.payment_date
-          ? new Date(form.payment_date).toISOString()
-          : new Date().toISOString(),
-        p_screenshot_url: form.screenshot_url,
-        p_father_name: form.father_name.trim() || null,
-      });
+      const { data, error } =
+        await supabase.rpc(
+          'submit_public_donation',
+          {
+            p_donor_name:
+              form.donor_name.trim(),
 
-      if (error) throw error;
+            p_phone:
+              form.phone.trim(),
+
+            p_amount:
+              Number(form.amount),
+
+            p_transaction_id:
+              form.transaction_id.trim(),
+
+            p_payment_date:
+              form.payment_date
+                ? new Date(
+                    form.payment_date
+                  ).toISOString()
+                : new Date().toISOString(),
+
+            p_screenshot_url:
+              form.screenshot_url,
+
+            p_father_name:
+              form.father_name.trim() ||
+              null,
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
 
       if (data) {
         setSubmitted(true);
+      } else {
+        setSubmitError(
+          'Payment details could not be submitted. Please try again.'
+        );
       }
-    } catch {
+    } catch (error) {
+      console.error(
+        'Donation submission error:',
+        error
+      );
+
       setSubmitError(
         'Could not submit your payment details. Please try again or contact the committee.'
       );
@@ -209,8 +429,16 @@ export function DonatePage() {
     }
   }
 
+  /*
+   * ------------------------------------------------------------
+   * PAGE
+   * ------------------------------------------------------------
+   */
+
   return (
     <div className="space-y-6 pb-10">
+
+      {/* PAGE HEADING */}
 
       <SectionHeading
         title="Quick Donate"
@@ -220,203 +448,320 @@ export function DonatePage() {
             onClick={() => navigate(-1)}
             className="btn-ghost px-4 py-2 text-sm"
           >
-            <ArrowLeft className="w-4 h-4" /> Back
+            <ArrowLeft className="w-4 h-4" />
+            Back
           </button>
         }
       />
 
-      {/* DIRECT UPI PAYMENT */}
-      <Card className="relative overflow-hidden">
-        <div className="absolute -right-8 -top-8 w-28 h-28 text-saffron-300/20">
-          <Mandala className="w-full h-full animate-spin-slow" />
-        </div>
+      {/* ====================================================== */}
+      {/* QR + UPI ID                                            */}
+      {/* ====================================================== */}
 
-        <div className="relative space-y-4">
+      <div id="upi-qr-section">
 
-          <div>
-            <h3 className="font-display text-lg font-semibold text-maroon-800 dark:text-gold-200">
-              Pay Directly with UPI
-            </h3>
+        <Card className="relative overflow-hidden">
 
-            <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
-              Enter your donation amount and tap Pay Now. Your UPI app will open
-              with the payment amount filled in.
-            </p>
+          <div className="absolute -right-8 -top-8 w-28 h-28 text-saffron-300/20">
+            <Mandala className="w-full h-full animate-spin-slow" />
           </div>
 
-          <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+          <div className="absolute -left-6 -bottom-6 w-20 h-20 text-lotus-300/20">
+            <Lotus className="w-full h-full" />
+          </div>
 
-            <div>
-              <label className="label">
-                Donation Amount (₹) <span className="text-red-500">*</span>
-              </label>
+          <div className="relative grid md:grid-cols-2 gap-6 items-center">
 
-              <input
-                type="number"
-                min="1"
-                step="1"
-                inputMode="decimal"
-                value={form.amount}
-                onChange={e => {
-                  setForm({
-                    ...form,
-                    amount: e.target.value,
-                  });
+            {/* QR CODE */}
 
-                  if (errors.amount) {
-                    setErrors(prev => {
-                      const next = { ...prev };
-                      delete next.amount;
-                      return next;
-                    });
-                  }
-                }}
-                className="input text-lg"
-                placeholder="Enter amount"
-              />
+            <div className="flex flex-col items-center gap-3">
 
-              {errors.amount && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.amount}
-                </p>
+              {upiQr ? (
+                <div className="relative">
+
+                  <div className="absolute inset-0 rounded-2xl bg-saffron-gradient opacity-20 blur-xl" />
+
+                  <div className="relative h-64 w-64 rounded-2xl bg-white p-3 shadow-glow-saffron">
+
+                    <img
+                      src={upiQr}
+                      alt="UPI QR Code"
+                      className="w-full h-full object-contain"
+                    />
+
+                  </div>
+
+                </div>
+              ) : (
+                <div className="h-64 w-64 rounded-2xl bg-saffron-50 dark:bg-maroon-800 flex flex-col items-center justify-center text-saffron-400 gap-2">
+
+                  <QrCode className="w-20 h-20" />
+
+                  <p className="text-sm text-maroon-500 dark:text-cream/60 text-center px-4">
+                    QR code not uploaded yet.
+                    Please use the UPI ID below.
+                  </p>
+
+                </div>
               )}
+
+              <Badge color="saffron">
+                Scan to Pay
+              </Badge>
+
             </div>
 
-            <button
-              type="button"
-              onClick={payNow}
-              className="btn-primary px-6 py-3 whitespace-nowrap"
-            >
-              <Smartphone className="w-5 h-5" />
-              Pay Now
-            </button>
+            {/* UPI DETAILS */}
 
-          </div>
+            <div className="space-y-4">
 
-          <div className="flex items-center gap-2 text-xs text-maroon-500 dark:text-cream/60">
-            <ShieldCheck className="w-4 h-4 text-saffron-500 shrink-0" />
+              <div>
 
-            UPI ID:
-            <span className="font-mono font-medium">
-              {upiId}
-            </span>
-          </div>
+                <p className="text-xs uppercase tracking-wide text-maroon-500 dark:text-cream/60 font-semibold mb-1">
+                  UPI ID
+                </p>
 
-          <p className="text-xs text-maroon-400 dark:text-cream/50">
-            After completing payment, return here and submit your transaction
-            details below so the committee can verify your donation.
-          </p>
+                <div className="flex items-center gap-2">
 
-        </div>
-      </Card>
+                  <p className="text-lg font-mono font-medium text-maroon-800 dark:text-gold-200 break-all flex-1">
+                    {upiId || 'Not configured'}
+                  </p>
 
-      {/* QR + UPI ID */}
-      <Card className="relative overflow-hidden">
+                  {upiId && (
+                    <button
+                      type="button"
+                      onClick={copyUpiId}
+                      className="btn-outline px-3 py-2 text-sm shrink-0"
+                      aria-label="Copy UPI ID"
+                    >
+                      {copied ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
 
-        <div className="absolute -right-8 -top-8 w-28 h-28 text-saffron-300/20">
-          <Mandala className="w-full h-full animate-spin-slow" />
-        </div>
-
-        <div className="absolute -left-6 -bottom-6 w-20 h-20 text-lotus-300/20">
-          <Lotus className="w-full h-full" />
-        </div>
-
-        <div className="relative grid md:grid-cols-2 gap-6 items-center">
-
-          <div className="flex flex-col items-center gap-3">
-
-            {upiQr ? (
-              <div className="relative">
-
-                <div className="absolute inset-0 rounded-2xl bg-saffron-gradient opacity-20 blur-xl" />
-
-                <div className="relative h-64 w-64 rounded-2xl bg-white p-3 shadow-glow-saffron">
-
-                  <img
-                    src={upiQr}
-                    alt="UPI QR Code"
-                    className="w-full h-full object-contain"
-                  />
+                      {copied
+                        ? 'Copied'
+                        : 'Copy'}
+                    </button>
+                  )}
 
                 </div>
 
               </div>
-            ) : (
-              <div className="h-64 w-64 rounded-2xl bg-saffron-50 dark:bg-maroon-800 flex flex-col items-center justify-center text-saffron-400 gap-2">
 
-                <QrCode className="w-20 h-20" />
+              <div className="space-y-2 text-sm text-maroon-600 dark:text-cream/70">
 
-                <p className="text-sm text-maroon-500 dark:text-cream/60 text-center px-4">
-                  QR code not uploaded yet. Please use the UPI ID below.
+                <p className="font-semibold text-maroon-800 dark:text-gold-200">
+                  Payment Instructions:
+                </p>
+
+                <ol className="list-decimal list-inside space-y-1.5">
+
+                  <li>
+                    Enter your donation amount below.
+                  </li>
+
+                  <li>
+                    Choose PhonePe, Google Pay, Paytm,
+                    or another UPI app.
+                  </li>
+
+                  <li>
+                    Complete the payment.
+                  </li>
+
+                  <li>
+                    Note down the Transaction Reference ID.
+                  </li>
+
+                  <li>
+                    Submit your payment details below.
+                  </li>
+
+                </ol>
+
+              </div>
+
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-saffron-50 dark:bg-maroon-800/60 border border-saffron-200/60 dark:border-maroon-700">
+
+                <ShieldCheck className="w-5 h-5 text-saffron-600 dark:text-gold-300 shrink-0 mt-0.5" />
+
+                <p className="text-xs text-maroon-600 dark:text-cream/70">
+                  Your payment goes directly to the committee's
+                  UPI account. Submitting your payment details
+                  helps the committee verify your contribution.
                 </p>
 
               </div>
-            )}
 
-            <Badge color="saffron">
-              Scan to Pay
-            </Badge>
+            </div>
 
           </div>
 
-          <div className="space-y-4">
+        </Card>
 
-            <div>
+      </div>
 
-              <p className="text-xs uppercase tracking-wide text-maroon-500 dark:text-cream/60 font-semibold mb-1">
+      {/* ====================================================== */}
+      {/* QUICK PAYMENT                                          */}
+      {/* ====================================================== */}
+
+      <Card className="relative overflow-hidden">
+
+        <div className="absolute -right-8 -top-8 w-28 h-28 text-saffron-300/20">
+          <Mandala className="w-full h-full animate-spin-slow" />
+        </div>
+
+        <div className="relative space-y-5">
+
+          <div>
+
+            <h3 className="font-display text-xl font-semibold text-maroon-800 dark:text-gold-200">
+              Quick UPI Payment
+            </h3>
+
+            <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
+              Enter your donation amount and choose
+              your preferred payment method.
+            </p>
+
+          </div>
+
+          {/* AMOUNT */}
+
+          <div>
+
+            <label className="label">
+              Donation Amount (₹)
+              <span className="text-red-500">*</span>
+            </label>
+
+            <input
+              type="number"
+              min="1"
+              step="1"
+              inputMode="decimal"
+              value={form.amount}
+              onChange={(e) => {
+                setForm({
+                  ...form,
+                  amount: e.target.value,
+                });
+
+                if (errors.amount) {
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.amount;
+                    return next;
+                  });
+                }
+              }}
+              className="input text-lg"
+              placeholder="Enter donation amount"
+            />
+
+            {errors.amount && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.amount}
+              </p>
+            )}
+
+          </div>
+
+          {/* PAYMENT METHODS */}
+
+          <div>
+
+            <p className="text-sm font-semibold text-maroon-800 dark:text-gold-200 mb-3">
+              Choose Payment Method
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+              <button
+                type="button"
+                onClick={payWithPhonePe}
+                className="btn-primary px-4 py-3 justify-center"
+              >
+                <Smartphone className="w-5 h-5" />
+                PhonePe
+              </button>
+
+              <button
+                type="button"
+                onClick={payWithGooglePay}
+                className="btn-outline px-4 py-3 justify-center"
+              >
+                <Smartphone className="w-5 h-5" />
+                Google Pay
+              </button>
+
+              <button
+                type="button"
+                onClick={payWithPaytm}
+                className="btn-outline px-4 py-3 justify-center"
+              >
+                <Smartphone className="w-5 h-5" />
+                Paytm
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* OTHER PAYMENT OPTIONS */}
+
+          <div className="grid sm:grid-cols-2 gap-3">
+
+            <button
+              type="button"
+              onClick={scrollToQr}
+              className="btn-outline px-4 py-3 justify-center"
+            >
+              <QrCode className="w-5 h-5" />
+              Scan QR Code
+            </button>
+
+            <button
+              type="button"
+              onClick={copyUpiId}
+              className="btn-outline px-4 py-3 justify-center"
+            >
+
+              {copied ? (
+                <Check className="w-5 h-5 text-green-600" />
+              ) : (
+                <Copy className="w-5 h-5" />
+              )}
+
+              {copied
+                ? 'UPI ID Copied'
+                : 'Copy UPI ID'}
+
+            </button>
+
+          </div>
+
+          {/* UPI INFORMATION */}
+
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-saffron-50 dark:bg-maroon-800/60 border border-saffron-200/60 dark:border-maroon-700">
+
+            <ShieldCheck className="w-5 h-5 text-saffron-600 dark:text-gold-300 shrink-0 mt-0.5" />
+
+            <div className="text-xs text-maroon-600 dark:text-cream/70">
+
+              <p className="font-semibold mb-1">
                 UPI ID
               </p>
 
-              <div className="flex items-center gap-2">
-
-                <p className="text-lg font-mono font-medium text-maroon-800 dark:text-gold-200 break-all flex-1">
-                  {upiId || 'Not configured'}
-                </p>
-
-                {upiId && (
-                  <button
-                    type="button"
-                    onClick={copyUpiId}
-                    className="btn-outline px-3 py-2 text-sm shrink-0"
-                    aria-label="Copy UPI ID"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-
-                    {copied ? 'Copied' : 'Copy'}
-                  </button>
-                )}
-
-              </div>
-
-            </div>
-
-            <div className="space-y-2 text-sm text-maroon-600 dark:text-cream/70">
-
-              <p className="font-semibold text-maroon-800 dark:text-gold-200">
-                Payment Instructions:
+              <p className="font-mono break-all">
+                {upiId || 'Not configured'}
               </p>
 
-              <ol className="list-decimal list-inside space-y-1.5">
-                <li>Enter the donation amount above and tap Pay Now</li>
-                <li>Your UPI app will open with the amount pre-filled</li>
-                <li>Complete the payment in your UPI app</li>
-                <li>Return here and note the Transaction Reference ID</li>
-                <li>Tap "Submit Payment Details" below</li>
-              </ol>
-
-            </div>
-
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-saffron-50 dark:bg-maroon-800/60 border border-saffron-200/60 dark:border-maroon-700">
-
-              <ShieldCheck className="w-5 h-5 text-saffron-600 dark:text-gold-300 shrink-0 mt-0.5" />
-
-              <p className="text-xs text-maroon-600 dark:text-cream/70">
-                Your payment goes directly to the committee's UPI account.
-                Submitting details here helps the committee verify your contribution.
+              <p className="mt-2">
+                After completing payment, return here and
+                submit your transaction details for verification.
               </p>
 
             </div>
@@ -424,9 +769,13 @@ export function DonatePage() {
           </div>
 
         </div>
+
       </Card>
 
-      {/* SUBMIT PAYMENT DETAILS */}
+      {/* ====================================================== */}
+      {/* ALREADY PAID / SUBMIT DETAILS                          */}
+      {/* ====================================================== */}
+
       {!showForm && !submitted && (
         <Card className="text-center">
 
@@ -443,12 +792,14 @@ export function DonatePage() {
               </h3>
 
               <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
-                Submit your payment details so the committee can verify your donation.
+                Submit your payment details so the committee
+                can verify your donation.
               </p>
 
             </div>
 
             <button
+              type="button"
               onClick={() => setShowForm(true)}
               className="btn-primary px-6 py-3 mt-1"
             >
@@ -457,10 +808,14 @@ export function DonatePage() {
             </button>
 
           </div>
+
         </Card>
       )}
 
-      {/* SUBMISSION FORM */}
+      {/* ====================================================== */}
+      {/* SUBMISSION FORM                                        */}
+      {/* ====================================================== */}
+
       {showForm && !submitted && (
         <Card className="relative overflow-hidden">
 
@@ -474,22 +829,29 @@ export function DonatePage() {
               Submit Payment Details
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+
+              {/* NAME + FATHER NAME */}
 
               <div className="grid sm:grid-cols-2 gap-4">
 
                 <div>
 
                   <label className="label">
-                    Your Name <span className="text-red-500">*</span>
+                    Your Name
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <input
                     value={form.donor_name}
-                    onChange={e =>
+                    onChange={(e) =>
                       setForm({
                         ...form,
-                        donor_name: e.target.value,
+                        donor_name:
+                          e.target.value,
                       })
                     }
                     className="input"
@@ -512,10 +874,11 @@ export function DonatePage() {
 
                   <input
                     value={form.father_name}
-                    onChange={e =>
+                    onChange={(e) =>
                       setForm({
                         ...form,
-                        father_name: e.target.value,
+                        father_name:
+                          e.target.value,
                       })
                     }
                     className="input"
@@ -523,6 +886,8 @@ export function DonatePage() {
                   />
 
                 </div>
+
+                {/* PHONE */}
 
                 <div>
 
@@ -532,7 +897,7 @@ export function DonatePage() {
 
                   <input
                     value={form.phone}
-                    onChange={e =>
+                    onChange={(e) =>
                       setForm({
                         ...form,
                         phone: e.target.value,
@@ -540,6 +905,7 @@ export function DonatePage() {
                     }
                     className="input"
                     placeholder="98480XXXXX"
+                    inputMode="tel"
                   />
 
                   {errors.phone && (
@@ -552,22 +918,26 @@ export function DonatePage() {
 
               </div>
 
+              {/* AMOUNT + DATE */}
+
               <div className="grid sm:grid-cols-2 gap-4">
 
                 <div>
 
                   <label className="label">
-                    Donation Amount (₹) <span className="text-red-500">*</span>
+                    Donation Amount (₹)
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <input
                     type="number"
                     min="1"
                     value={form.amount}
-                    onChange={e =>
+                    onChange={(e) =>
                       setForm({
                         ...form,
-                        amount: e.target.value,
+                        amount:
+                          e.target.value,
                       })
                     }
                     className="input"
@@ -585,16 +955,18 @@ export function DonatePage() {
                 <div>
 
                   <label className="label">
-                    Payment Date <span className="text-red-500">*</span>
+                    Payment Date
+                    <span className="text-red-500">*</span>
                   </label>
 
                   <input
                     type="date"
                     value={form.payment_date}
-                    onChange={e =>
+                    onChange={(e) =>
                       setForm({
                         ...form,
-                        payment_date: e.target.value,
+                        payment_date:
+                          e.target.value,
                       })
                     }
                     className="input"
@@ -610,18 +982,22 @@ export function DonatePage() {
 
               </div>
 
+              {/* TRANSACTION ID */}
+
               <div>
 
                 <label className="label">
-                  Transaction ID <span className="text-red-500">*</span>
+                  Transaction ID
+                  <span className="text-red-500">*</span>
                 </label>
 
                 <input
                   value={form.transaction_id}
-                  onChange={e =>
+                  onChange={(e) =>
                     setForm({
                       ...form,
-                      transaction_id: e.target.value,
+                      transaction_id:
+                        e.target.value,
                     })
                   }
                   className="input"
@@ -636,6 +1012,8 @@ export function DonatePage() {
 
               </div>
 
+              {/* SCREENSHOT */}
+
               <div>
 
                 <label className="label">
@@ -643,7 +1021,8 @@ export function DonatePage() {
                 </label>
 
                 <p className="text-xs text-maroon-400 dark:text-cream/50 -mt-1 mb-2">
-                  Upload a screenshot of your payment confirmation to help the admin verify faster.
+                  Upload a screenshot of your payment
+                  confirmation to help the admin verify faster.
                 </p>
 
                 {form.screenshot_url ? (
@@ -671,7 +1050,8 @@ export function DonatePage() {
 
                   <div
                     onClick={() =>
-                      !uploading && fileInputRef.current?.click()
+                      !uploading &&
+                      fileInputRef.current?.click()
                     }
                     className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-saffron-300 dark:border-maroon-700 bg-saffron-50/60 dark:bg-maroon-900/30 p-6 cursor-pointer hover:border-saffron-500 hover:bg-saffron-100/60 dark:hover:bg-maroon-800/40 transition-all"
                   >
@@ -680,6 +1060,7 @@ export function DonatePage() {
 
                       <>
                         <Loader2 className="w-6 h-6 text-saffron-500 animate-spin" />
+
                         <p className="text-sm text-maroon-500 dark:text-cream/60">
                           Uploading…
                         </p>
@@ -688,25 +1069,32 @@ export function DonatePage() {
                     ) : (
 
                       <>
+
                         <div className="h-10 w-10 rounded-xl bg-saffron-100 dark:bg-maroon-800 flex items-center justify-center">
+
                           <ImageIcon className="w-5 h-5 text-saffron-500" />
+
                         </div>
 
                         <p className="text-sm font-medium text-maroon-700 dark:text-cream/80">
+
                           <span className="text-saffron-600 dark:text-saffron-300">
                             Click to upload
                           </span>{' '}
                           payment screenshot
+
                         </p>
 
                         <p className="text-xs text-maroon-400 dark:text-cream/50">
                           JPG, PNG, WebP · max 5 MB
                         </p>
+
                       </>
 
                     )}
 
                   </div>
+
                 )}
 
                 <input
@@ -714,8 +1102,9 @@ export function DonatePage() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="sr-only"
-                  onChange={e => {
-                    const f = e.target.files?.[0];
+                  onChange={(e) => {
+                    const f =
+                      e.target.files?.[0];
 
                     if (f) {
                       handleScreenshot(f);
@@ -733,6 +1122,8 @@ export function DonatePage() {
 
               </div>
 
+              {/* ERROR */}
+
               {submitError && (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700">
 
@@ -745,6 +1136,8 @@ export function DonatePage() {
                 </div>
               )}
 
+              {/* BUTTONS */}
+
               <div className="flex justify-end gap-2 pt-2">
 
                 <button
@@ -752,6 +1145,7 @@ export function DonatePage() {
                   onClick={() => {
                     setShowForm(false);
                     setErrors({});
+                    setSubmitError('');
                   }}
                   className="btn-ghost px-5 py-2.5"
                 >
@@ -785,17 +1179,23 @@ export function DonatePage() {
             </form>
 
           </div>
+
         </Card>
       )}
 
-      {/* SUCCESS */}
+      {/* ====================================================== */}
+      {/* SUCCESS CONFIRMATION                                   */}
+      {/* ====================================================== */}
+
       {submitted && (
         <Card className="text-center">
 
           <div className="flex flex-col items-center gap-4">
 
             <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+
               <CheckCircle2 className="w-8 h-8" />
+
             </div>
 
             <div>
@@ -805,7 +1205,10 @@ export function DonatePage() {
               </h3>
 
               <p className="text-sm text-maroon-500 dark:text-cream/60 mt-2 max-w-md">
-                Thank you for your donation. The committee will verify your payment and confirm it shortly. Your generosity is deeply appreciated.
+                Thank you for your donation.
+                The committee will verify your payment
+                and confirm it shortly.
+                Your generosity is deeply appreciated.
               </p>
 
             </div>
@@ -813,6 +1216,7 @@ export function DonatePage() {
             <div className="flex flex-wrap gap-3 justify-center">
 
               <button
+                type="button"
                 onClick={() => navigate('/')}
                 className="btn-primary px-5 py-2.5"
               >
@@ -821,12 +1225,19 @@ export function DonatePage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   setSubmitted(false);
                   setShowForm(false);
+                  setSubmitError('');
+                  setErrors({});
+
                   setForm({
                     ...emptyForm,
-                    payment_date: new Date().toISOString().slice(0, 10),
+                    payment_date:
+                      new Date()
+                        .toISOString()
+                        .slice(0, 10),
                   });
                 }}
                 className="btn-outline px-5 py-2.5"
@@ -838,9 +1249,10 @@ export function DonatePage() {
             </div>
 
           </div>
+
         </Card>
       )}
 
     </div>
   );
-}
+        }
