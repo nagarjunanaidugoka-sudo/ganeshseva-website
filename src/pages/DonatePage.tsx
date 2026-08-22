@@ -430,4 +430,417 @@ export function DonatePage() {
       {!showForm && !submitted && (
         <Card className="text-center">
 
-          <div className="flex flex-col items
+          <div className="flex flex-col items-center gap-3">
+
+            <div className="h-14 w-14 rounded-full bg-saffron-gradient flex items-center justify-center text-white shadow-glow-saffron">
+              <HandCoins className="w-7 h-7" />
+            </div>
+
+            <div>
+
+              <h3 className="font-display text-lg font-semibold text-maroon-800 dark:text-gold-200">
+                Already Paid?
+              </h3>
+
+              <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
+                Submit your payment details so the committee can verify your donation.
+              </p>
+
+            </div>
+
+            <button
+              onClick={() => setShowForm(true)}
+              className="btn-primary px-6 py-3 mt-1"
+            >
+              <HandCoins className="w-5 h-5" />
+              Submit Payment Details
+            </button>
+
+          </div>
+        </Card>
+      )}
+
+      {/* SUBMISSION FORM */}
+      {showForm && !submitted && (
+        <Card className="relative overflow-hidden">
+
+          <div className="absolute -right-6 -top-6 w-20 h-20 text-saffron-400/20">
+            <Diya className="w-full h-full animate-flicker" />
+          </div>
+
+          <div className="relative">
+
+            <h3 className="font-display text-xl font-semibold text-maroon-800 dark:text-gold-200 mb-4">
+              Submit Payment Details
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+
+              <div className="grid sm:grid-cols-2 gap-4">
+
+                <div>
+
+                  <label className="label">
+                    Your Name <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    value={form.donor_name}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        donor_name: e.target.value,
+                      })
+                    }
+                    className="input"
+                    placeholder="Enter your name"
+                  />
+
+                  {errors.donor_name && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.donor_name}
+                    </p>
+                  )}
+
+                </div>
+
+                <div>
+
+                  <label className="label">
+                    Father's Name (optional)
+                  </label>
+
+                  <input
+                    value={form.father_name}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        father_name: e.target.value,
+                      })
+                    }
+                    className="input"
+                    placeholder="e.g. Suresh"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="label">
+                    Phone Number
+                  </label>
+
+                  <input
+                    value={form.phone}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        phone: e.target.value,
+                      })
+                    }
+                    className="input"
+                    placeholder="98480XXXXX"
+                  />
+
+                  {errors.phone && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.phone}
+                    </p>
+                  )}
+
+                </div>
+
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+
+                <div>
+
+                  <label className="label">
+                    Donation Amount (₹) <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="number"
+                    min="1"
+                    value={form.amount}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        amount: e.target.value,
+                      })
+                    }
+                    className="input"
+                    placeholder="0"
+                  />
+
+                  {errors.amount && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.amount}
+                    </p>
+                  )}
+
+                </div>
+
+                <div>
+
+                  <label className="label">
+                    Payment Date <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="date"
+                    value={form.payment_date}
+                    onChange={e =>
+                      setForm({
+                        ...form,
+                        payment_date: e.target.value,
+                      })
+                    }
+                    className="input"
+                  />
+
+                  {errors.payment_date && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {errors.payment_date}
+                    </p>
+                  )}
+
+                </div>
+
+              </div>
+
+              <div>
+
+                <label className="label">
+                  Transaction ID <span className="text-red-500">*</span>
+                </label>
+
+                <input
+                  value={form.transaction_id}
+                  onChange={e =>
+                    setForm({
+                      ...form,
+                      transaction_id: e.target.value,
+                    })
+                  }
+                  className="input"
+                  placeholder="UPI reference number"
+                />
+
+                {errors.transaction_id && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {errors.transaction_id}
+                  </p>
+                )}
+
+              </div>
+
+              <div>
+
+                <label className="label">
+                  Payment Screenshot (optional)
+                </label>
+
+                <p className="text-xs text-maroon-400 dark:text-cream/50 -mt-1 mb-2">
+                  Upload a screenshot of your payment confirmation to help the admin verify faster.
+                </p>
+
+                {form.screenshot_url ? (
+
+                  <div className="relative group rounded-2xl overflow-hidden border border-saffron-200 dark:border-maroon-700 bg-saffron-50 dark:bg-maroon-900/40 max-w-xs">
+
+                    <img
+                      src={form.screenshot_url}
+                      alt="Payment screenshot"
+                      className="w-full object-contain"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={removeScreenshot}
+                      className="absolute top-2 right-2 h-8 w-8 rounded-lg bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition"
+                      aria-label="Remove screenshot"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+
+                  </div>
+
+                ) : (
+
+                  <div
+                    onClick={() =>
+                      !uploading && fileInputRef.current?.click()
+                    }
+                    className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-saffron-300 dark:border-maroon-700 bg-saffron-50/60 dark:bg-maroon-900/30 p-6 cursor-pointer hover:border-saffron-500 hover:bg-saffron-100/60 dark:hover:bg-maroon-800/40 transition-all"
+                  >
+
+                    {uploading ? (
+
+                      <>
+                        <Loader2 className="w-6 h-6 text-saffron-500 animate-spin" />
+                        <p className="text-sm text-maroon-500 dark:text-cream/60">
+                          Uploading…
+                        </p>
+                      </>
+
+                    ) : (
+
+                      <>
+                        <div className="h-10 w-10 rounded-xl bg-saffron-100 dark:bg-maroon-800 flex items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-saffron-500" />
+                        </div>
+
+                        <p className="text-sm font-medium text-maroon-700 dark:text-cream/80">
+                          <span className="text-saffron-600 dark:text-saffron-300">
+                            Click to upload
+                          </span>{' '}
+                          payment screenshot
+                        </p>
+
+                        <p className="text-xs text-maroon-400 dark:text-cream/50">
+                          JPG, PNG, WebP · max 5 MB
+                        </p>
+                      </>
+
+                    )}
+
+                  </div>
+                )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+
+                    if (f) {
+                      handleScreenshot(f);
+                    }
+
+                    e.target.value = '';
+                  }}
+                />
+
+                {uploadError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {uploadError}
+                  </p>
+                )}
+
+              </div>
+
+              {submitError && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700">
+
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+
+                  <p className="text-sm text-red-700 dark:text-red-200">
+                    {submitError}
+                  </p>
+
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setErrors({});
+                  }}
+                  className="btn-ghost px-5 py-2.5"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary px-5 py-2.5"
+                >
+
+                  {submitting ? (
+
+                    <span className="flex items-center gap-2">
+
+                      <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+
+                      Submitting...
+
+                    </span>
+
+                  ) : (
+                    'Submit Details'
+                  )}
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+        </Card>
+      )}
+
+      {/* SUCCESS */}
+      {submitted && (
+        <Card className="text-center">
+
+          <div className="flex flex-col items-center gap-4">
+
+            <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+
+            <div>
+
+              <h3 className="font-display text-xl font-semibold text-maroon-800 dark:text-gold-200">
+                Payment Details Submitted!
+              </h3>
+
+              <p className="text-sm text-maroon-500 dark:text-cream/60 mt-2 max-w-md">
+                Thank you for your donation. The committee will verify your payment and confirm it shortly. Your generosity is deeply appreciated.
+              </p>
+
+            </div>
+
+            <div className="flex flex-wrap gap-3 justify-center">
+
+              <button
+                onClick={() => navigate('/')}
+                className="btn-primary px-5 py-2.5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </button>
+
+              <button
+                onClick={() => {
+                  setSubmitted(false);
+                  setShowForm(false);
+                  setForm({
+                    ...emptyForm,
+                    payment_date: new Date().toISOString().slice(0, 10),
+                  });
+                }}
+                className="btn-outline px-5 py-2.5"
+              >
+                <Smartphone className="w-4 h-4" />
+                Donate Again
+              </button>
+
+            </div>
+
+          </div>
+        </Card>
+      )}
+
+    </div>
+  );
+}
