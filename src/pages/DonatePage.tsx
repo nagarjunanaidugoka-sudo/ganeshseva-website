@@ -62,22 +62,24 @@ export function DonatePage() {
   if (loading) {
     return (
       <Loader
-        label={tc('common.loading', t('common.loading', lang))}
+        label={tc(
+          'common.loading',
+          t('common.loading', lang)
+        )}
       />
     );
   }
 
   const upiId = settings?.upi_id || '';
   const upiQr = settings?.upi_qr_url || '';
+
   const committeeName =
     settings?.committee_name ||
     tc('app.name', t('appName', lang));
 
-  /*
-   * ------------------------------------------------------------
-   * UPI PAYMENT FUNCTIONS
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // PAYMENT AMOUNT
+  // --------------------------------------------------
 
   function getPaymentAmount(): number | null {
     const amount = Number(form.amount);
@@ -104,6 +106,10 @@ export function DonatePage() {
     return amount;
   }
 
+  // --------------------------------------------------
+  // CREATE STANDARD UPI LINK
+  // --------------------------------------------------
+
   function createUpiUrl(amount: number): string {
     return (
       `upi://pay?pa=${encodeURIComponent(upiId)}` +
@@ -113,70 +119,73 @@ export function DonatePage() {
     );
   }
 
-  function payWithUPI() {
+  // --------------------------------------------------
+  // OPEN UPI PAYMENT
+  // --------------------------------------------------
+
+  function openUPIPayment() {
     const amount = getPaymentAmount();
 
-    if (amount === null) return;
-
-    if (!upiId) {
-      setSubmitError('UPI ID is not configured.');
+    if (amount === null) {
       return;
     }
 
-    window.location.href = createUpiUrl(amount);
+    if (!upiId) {
+      setSubmitError(
+        'UPI ID is not configured. Please configure it from the admin panel.'
+      );
+      return;
+    }
+
+    setSubmitError('');
+
+    const upiUrl = createUpiUrl(amount);
+
+    window.location.href = upiUrl;
   }
 
- function openUPIPayment() {
-  const amount = getPaymentAmount();
+  // These all intentionally use the standard UPI link.
+  // Android will open the available UPI app / chooser.
 
-  if (amount === null) return;
-
-  if (!upiId) {
-    setSubmitError('UPI ID is not configured.');
-    return;
+  function payWithPhonePe() {
+    openUPIPayment();
   }
 
-  const upiUrl =
-    upi://pay?pa=${encodeURIComponent(upiId)} +
-    &pn=${encodeURIComponent(committeeName)} +
-    &am=${encodeURIComponent(amount.toFixed(2))} +
-    &cu=INR;
+  function payWithGooglePay() {
+    openUPIPayment();
+  }
 
-  window.location.href = upiUrl;
-}
+  function payWithPaytm() {
+    openUPIPayment();
+  }
 
-function payWithPhonePe() {
-  openUPIPayment();
-}
-
-function payWithGooglePay() {
-  openUPIPayment();
-}
-
-function payWithPaytm() {
-  openUPIPayment();
-}
-
+  // --------------------------------------------------
+  // SCROLL TO QR
+  // --------------------------------------------------
 
   function scrollToQr() {
-    const qrSection = document.getElementById(
-      'upi-qr-section'
-    );
+    const qrSection =
+      document.getElementById('upi-qr-section');
 
-    qrSection?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-    });
+    if (qrSection) {
+      qrSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
   }
 
-  /*
-   * ------------------------------------------------------------
-   * COPY UPI ID
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // COPY UPI ID
+  // --------------------------------------------------
 
   function copyUpiId() {
-    if (!upiId) return;
+    if (!upiId) {
+      setSubmitError(
+        'UPI ID is not configured.'
+      );
+      return;
+    }
 
     navigator.clipboard
       .writeText(upiId)
@@ -188,15 +197,15 @@ function payWithPaytm() {
         }, 2000);
       })
       .catch(() => {
-        setSubmitError('Could not copy UPI ID. Please copy it manually.');
+        setSubmitError(
+          'Could not copy UPI ID. Please copy it manually.'
+        );
       });
   }
 
-  /*
-   * ------------------------------------------------------------
-   * FORM VALIDATION
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // VALIDATE FORM
+  // --------------------------------------------------
 
   function validate(
     f: SubmitForm
@@ -208,14 +217,16 @@ function payWithPaytm() {
     }
 
     if (!f.amount || Number(f.amount) <= 0) {
-      errs.amount = 'Amount must be greater than 0';
+      errs.amount =
+        'Amount must be greater than 0';
     }
 
     if (
       f.phone &&
       !/^[0-9+\-\s]{6,15}$/.test(f.phone)
     ) {
-      errs.phone = 'Enter a valid phone number';
+      errs.phone =
+        'Enter a valid phone number';
     }
 
     if (!f.transaction_id.trim()) {
@@ -231,11 +242,9 @@ function payWithPaytm() {
     return errs;
   }
 
-  /*
-   * ------------------------------------------------------------
-   * SCREENSHOT UPLOAD
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // SCREENSHOT UPLOAD
+  // --------------------------------------------------
 
   async function handleScreenshot(file: File) {
     if (!file) return;
@@ -266,17 +275,19 @@ function payWithPaytm() {
           .toString(36)
           .slice(2)}.${ext}`;
 
-      const { data, error: uploadErr } =
-        await supabase.storage
-          .from('image-uploads')
-          .upload(
-            filename,
-            file,
-            {
-              upsert: true,
-              contentType: file.type,
-            }
-          );
+      const {
+        data,
+        error: uploadErr,
+      } = await supabase.storage
+        .from('image-uploads')
+        .upload(
+          filename,
+          file,
+          {
+            upsert: true,
+            contentType: file.type,
+          }
+        );
 
       if (uploadErr || !data) {
         setUploadError(
@@ -290,10 +301,9 @@ function payWithPaytm() {
 
       const {
         data: { publicUrl },
-      } =
-        supabase.storage
-          .from('image-uploads')
-          .getPublicUrl(data.path);
+      } = supabase.storage
+        .from('image-uploads')
+        .getPublicUrl(data.path);
 
       setForm((f) => ({
         ...f,
@@ -301,7 +311,12 @@ function payWithPaytm() {
       }));
 
       setUploading(false);
-    } catch {
+    } catch (error) {
+      console.error(
+        'Screenshot upload error:',
+        error
+      );
+
       setUploadError(
         'Upload failed. Please try again.'
       );
@@ -321,11 +336,9 @@ function payWithPaytm() {
     }
   }
 
-  /*
-   * ------------------------------------------------------------
-   * SUBMIT PAYMENT DETAILS
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // SUBMIT PAYMENT DETAILS
+  // --------------------------------------------------
 
   async function handleSubmit(
     e: React.FormEvent
@@ -336,7 +349,7 @@ function payWithPaytm() {
 
     setErrors(errs);
 
-    if (Object.keys(errs).length) {
+    if (Object.keys(errs).length > 0) {
       return;
     }
 
@@ -344,37 +357,39 @@ function payWithPaytm() {
     setSubmitError('');
 
     try {
-      const { data, error } =
-        await supabase.rpc(
-          'submit_public_donation',
-          {
-            p_donor_name:
-              form.donor_name.trim(),
+      const {
+        data,
+        error,
+      } = await supabase.rpc(
+        'submit_public_donation',
+        {
+          p_donor_name:
+            form.donor_name.trim(),
 
-            p_phone:
-              form.phone.trim(),
+          p_phone:
+            form.phone.trim(),
 
-            p_amount:
-              Number(form.amount),
+          p_amount:
+            Number(form.amount),
 
-            p_transaction_id:
-              form.transaction_id.trim(),
+          p_transaction_id:
+            form.transaction_id.trim(),
 
-            p_payment_date:
-              form.payment_date
-                ? new Date(
-                    form.payment_date
-                  ).toISOString()
-                : new Date().toISOString(),
+          p_payment_date:
+            form.payment_date
+              ? new Date(
+                  form.payment_date
+                ).toISOString()
+              : new Date().toISOString(),
 
-            p_screenshot_url:
-              form.screenshot_url,
+          p_screenshot_url:
+            form.screenshot_url,
 
-            p_father_name:
-              form.father_name.trim() ||
-              null,
-          }
-        );
+          p_father_name:
+            form.father_name.trim() ||
+            null,
+        }
+      );
 
       if (error) {
         throw error;
@@ -401,11 +416,9 @@ function payWithPaytm() {
     }
   }
 
-  /*
-   * ------------------------------------------------------------
-   * PAGE
-   * ------------------------------------------------------------
-   */
+  // --------------------------------------------------
+  // PAGE
+  // --------------------------------------------------
 
   return (
     <div className="space-y-6 pb-10">
@@ -417,6 +430,7 @@ function payWithPaytm() {
         subtitle={`Support ${committeeName} via UPI`}
         action={
           <button
+            type="button"
             onClick={() => navigate(-1)}
             className="btn-ghost px-4 py-2 text-sm"
           >
@@ -426,9 +440,9 @@ function payWithPaytm() {
         }
       />
 
-      {/* ====================================================== */}
-      {/* QR + UPI ID                                            */}
-      {/* ====================================================== */}
+      {/* ================================================= */}
+      {/* QR + UPI ID */}
+      {/* ================================================= */}
 
       <div id="upi-qr-section">
 
@@ -535,8 +549,7 @@ function payWithPaytm() {
                   </li>
 
                   <li>
-                    Choose PhonePe, Google Pay, Paytm,
-                    or another UPI app.
+                    Choose a UPI payment option.
                   </li>
 
                   <li>
@@ -560,9 +573,10 @@ function payWithPaytm() {
                 <ShieldCheck className="w-5 h-5 text-saffron-600 dark:text-gold-300 shrink-0 mt-0.5" />
 
                 <p className="text-xs text-maroon-600 dark:text-cream/70">
-                  Your payment goes directly to the committee's
-                  UPI account. Submitting your payment details
-                  helps the committee verify your contribution.
+                  Your payment goes directly to the
+                  UPI account configured by the committee.
+                  Submitting your payment details helps
+                  the committee verify your contribution.
                 </p>
 
               </div>
@@ -575,9 +589,9 @@ function payWithPaytm() {
 
       </div>
 
-      {/* ====================================================== */}
-      {/* QUICK PAYMENT                                          */}
-      {/* ====================================================== */}
+      {/* ================================================= */}
+      {/* QUICK UPI PAYMENT */}
+      {/* ================================================= */}
 
       <Card className="relative overflow-hidden">
 
@@ -623,8 +637,12 @@ function payWithPaytm() {
 
                 if (errors.amount) {
                   setErrors((prev) => {
-                    const next = { ...prev };
+                    const next = {
+                      ...prev,
+                    };
+
                     delete next.amount;
+
                     return next;
                   });
                 }
@@ -641,7 +659,7 @@ function payWithPaytm() {
 
           </div>
 
-          {/* PAYMENT METHODS */}
+          {/* PAYMENT BUTTONS */}
 
           <div>
 
@@ -682,7 +700,7 @@ function payWithPaytm() {
 
           </div>
 
-          {/* OTHER PAYMENT OPTIONS */}
+          {/* QR + COPY */}
 
           <div className="grid sm:grid-cols-2 gap-3">
 
@@ -732,8 +750,9 @@ function payWithPaytm() {
               </p>
 
               <p className="mt-2">
-                After completing payment, return here and
-                submit your transaction details for verification.
+                After completing payment, return here
+                and submit your transaction details
+                for verification.
               </p>
 
             </div>
@@ -744,9 +763,9 @@ function payWithPaytm() {
 
       </Card>
 
-      {/* ====================================================== */}
-      {/* ALREADY PAID / SUBMIT DETAILS                          */}
-      {/* ====================================================== */}
+      {/* ================================================= */}
+      {/* ALREADY PAID */}
+      {/* ================================================= */}
 
       {!showForm && !submitted && (
         <Card className="text-center">
@@ -764,15 +783,18 @@ function payWithPaytm() {
               </h3>
 
               <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
-                Submit your payment details so the committee
-                can verify your donation.
+                Submit your payment details so the
+                committee can verify your donation.
               </p>
 
             </div>
 
             <button
               type="button"
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                setShowForm(true);
+                setSubmitError('');
+              }}
               className="btn-primary px-6 py-3 mt-1"
             >
               <HandCoins className="w-5 h-5" />
@@ -784,9 +806,9 @@ function payWithPaytm() {
         </Card>
       )}
 
-      {/* ====================================================== */}
-      {/* SUBMISSION FORM                                        */}
-      {/* ====================================================== */}
+      {/* ================================================= */}
+      {/* SUBMISSION FORM */}
+      {/* ================================================= */}
 
       {showForm && !submitted && (
         <Card className="relative overflow-hidden">
@@ -813,8 +835,10 @@ function payWithPaytm() {
                 <div>
 
                   <label className="label">
-                    Your Name
-                    <span className="text-red-500">*</span>
+                    Your Name{' '}
+                    <span className="text-red-500">
+                      *
+                    </span>
                   </label>
 
                   <input
@@ -859,8 +883,6 @@ function payWithPaytm() {
 
                 </div>
 
-                {/* PHONE */}
-
                 <div>
 
                   <label className="label">
@@ -872,7 +894,8 @@ function payWithPaytm() {
                     onChange={(e) =>
                       setForm({
                         ...form,
-                        phone: e.target.value,
+                        phone:
+                          e.target.value,
                       })
                     }
                     className="input"
@@ -897,8 +920,10 @@ function payWithPaytm() {
                 <div>
 
                   <label className="label">
-                    Donation Amount (₹)
-                    <span className="text-red-500">*</span>
+                    Donation Amount (₹){' '}
+                    <span className="text-red-500">
+                      *
+                    </span>
                   </label>
 
                   <input
@@ -927,8 +952,10 @@ function payWithPaytm() {
                 <div>
 
                   <label className="label">
-                    Payment Date
-                    <span className="text-red-500">*</span>
+                    Payment Date{' '}
+                    <span className="text-red-500">
+                      *
+                    </span>
                   </label>
 
                   <input
@@ -959,8 +986,10 @@ function payWithPaytm() {
               <div>
 
                 <label className="label">
-                  Transaction ID
-                  <span className="text-red-500">*</span>
+                  Transaction ID{' '}
+                  <span className="text-red-500">
+                    *
+                  </span>
                 </label>
 
                 <input
@@ -1041,26 +1070,20 @@ function payWithPaytm() {
                     ) : (
 
                       <>
-
                         <div className="h-10 w-10 rounded-xl bg-saffron-100 dark:bg-maroon-800 flex items-center justify-center">
-
                           <ImageIcon className="w-5 h-5 text-saffron-500" />
-
                         </div>
 
                         <p className="text-sm font-medium text-maroon-700 dark:text-cream/80">
-
                           <span className="text-saffron-600 dark:text-saffron-300">
                             Click to upload
                           </span>{' '}
                           payment screenshot
-
                         </p>
 
                         <p className="text-xs text-maroon-400 dark:text-cream/50">
                           JPG, PNG, WebP · max 5 MB
                         </p>
-
                       </>
 
                     )}
@@ -1075,11 +1098,11 @@ function payWithPaytm() {
                   accept="image/jpeg,image/png,image/webp"
                   className="sr-only"
                   onChange={(e) => {
-                    const f =
+                    const file =
                       e.target.files?.[0];
 
-                    if (f) {
-                      handleScreenshot(f);
+                    if (file) {
+                      handleScreenshot(file);
                     }
 
                     e.target.value = '';
@@ -1094,7 +1117,7 @@ function payWithPaytm() {
 
               </div>
 
-              {/* ERROR */}
+              {/* SUBMIT ERROR */}
 
               {submitError && (
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-700">
@@ -1108,7 +1131,7 @@ function payWithPaytm() {
                 </div>
               )}
 
-              {/* BUTTONS */}
+              {/* FORM BUTTONS */}
 
               <div className="flex justify-end gap-2 pt-2">
 
@@ -1131,7 +1154,6 @@ function payWithPaytm() {
                 >
 
                   {submitting ? (
-
                     <span className="flex items-center gap-2">
 
                       <span className="h-4 w-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -1139,7 +1161,6 @@ function payWithPaytm() {
                       Submitting...
 
                     </span>
-
                   ) : (
                     'Submit Details'
                   )}
@@ -1155,9 +1176,9 @@ function payWithPaytm() {
         </Card>
       )}
 
-      {/* ====================================================== */}
-      {/* SUCCESS CONFIRMATION                                   */}
-      {/* ====================================================== */}
+      {/* ================================================= */}
+      {/* SUCCESS */}
+      {/* ================================================= */}
 
       {submitted && (
         <Card className="text-center">
@@ -1227,4 +1248,4 @@ function payWithPaytm() {
 
     </div>
   );
-        }
+}
