@@ -126,65 +126,37 @@ export function DonatePage() {
     window.location.href = createUpiUrl(amount);
   }
 
-  function payWithPhonePe() {
-    const amount = getPaymentAmount();
+ function openUPIPayment() {
+  const amount = getPaymentAmount();
 
-    if (amount === null) return;
+  if (amount === null) return;
 
-    if (!upiId) {
-      setSubmitError('UPI ID is not configured.');
-      return;
-    }
-
-    const intentUrl =
-      `intent://pay?pa=${encodeURIComponent(upiId)}` +
-      `&pn=${encodeURIComponent(committeeName)}` +
-      `&am=${encodeURIComponent(amount.toFixed(2))}` +
-      `&cu=INR` +
-      `#Intent;scheme=upi;package=com.phonepe.app;end`;
-
-    window.location.href = intentUrl;
+  if (!upiId) {
+    setSubmitError('UPI ID is not configured.');
+    return;
   }
 
-  function payWithGooglePay() {
-    const amount = getPaymentAmount();
+  const upiUrl =
+    upi://pay?pa=${encodeURIComponent(upiId)} +
+    &pn=${encodeURIComponent(committeeName)} +
+    &am=${encodeURIComponent(amount.toFixed(2))} +
+    &cu=INR;
 
-    if (amount === null) return;
+  window.location.href = upiUrl;
+}
 
-    if (!upiId) {
-      setSubmitError('UPI ID is not configured.');
-      return;
-    }
+function payWithPhonePe() {
+  openUPIPayment();
+}
 
-    const intentUrl =
-      `intent://pay?pa=${encodeURIComponent(upiId)}` +
-      `&pn=${encodeURIComponent(committeeName)}` +
-      `&am=${encodeURIComponent(amount.toFixed(2))}` +
-      `&cu=INR` +
-      `#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+function payWithGooglePay() {
+  openUPIPayment();
+}
 
-    window.location.href = intentUrl;
-  }
+function payWithPaytm() {
+  openUPIPayment();
+}
 
-  function payWithPaytm() {
-    const amount = getPaymentAmount();
-
-    if (amount === null) return;
-
-    if (!upiId) {
-      setSubmitError('UPI ID is not configured.');
-      return;
-    }
-
-    const intentUrl =
-      `intent://pay?pa=${encodeURIComponent(upiId)}` +
-      `&pn=${encodeURIComponent(committeeName)}` +
-      `&am=${encodeURIComponent(amount.toFixed(2))}` +
-      `&cu=INR` +
-      `#Intent;scheme=upi;package=net.one97.paytm;end`;
-
-    window.location.href = intentUrl;
-  }
 
   function scrollToQr() {
     const qrSection = document.getElementById(
