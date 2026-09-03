@@ -80,48 +80,7 @@ export function Modal({
   title: string;
   children: ReactNode;
 }) {
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4"
-      role="dialog"
-      aria-modal="true"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 z-0 bg-maroon-950/50 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal */}
-      <div
-        className="relative z-10 w-full max-w-lg glass-card p-5 sm:p-6 animate-fade-in-scale max-h-[90vh] overflow-y-auto overscroll-contain"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-display text-2xl font-bold text-maroon-800 dark:text-gold-200">
-            {title}
-          </h3>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-ghost h-9 w-9 rounded-lg p-0 shrink-0"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="relative z-10">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-  if (!open) return null;
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-maroon-950/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
