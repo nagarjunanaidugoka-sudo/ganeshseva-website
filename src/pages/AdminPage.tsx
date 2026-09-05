@@ -153,7 +153,7 @@ export function AdminPage() {
         {/* Main content */}
         <main className="flex-1 min-w-0">
           {/* Mobile header */}
-          <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white dark:bg-maroon-950 border-b border-saffron-200/60 dark:border-maroon-800 sticky top-0 z-30">
+          <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white dark:bg-maroon-950 border-b border-saffron-200/60 dark:border-maroon-800 sticky top-0 z-10">
             <button
               onClick={() => setSidebarOpen(true)}
               className="h-9 w-9 rounded-xl flex items-center justify-center bg-saffron-50 dark:bg-maroon-800 text-maroon-600 dark:text-cream"
