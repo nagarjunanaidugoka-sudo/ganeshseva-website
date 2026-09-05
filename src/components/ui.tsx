@@ -49,7 +49,7 @@ export function Badge({
   };
 
   return (
-    <span className={badge ${colors[color]} ${className}}>
+    <span className={'badge ${colors[color]} ${className}'}>
       {children}
     </span>
   );
@@ -109,11 +109,11 @@ export function ProgressBar({
 
   return (
     <div
-      className={w-full h-3 rounded-full bg-saffron-100 dark:bg-maroon-800 overflow-hidden ${className}}
+      className={'w-full h-3 rounded-full bg-saffron-100 dark:bg-maroon-800 overflow-hidden ${className}'}
     >
       <div
         className="h-full rounded-full bg-saffron-gradient transition-all duration-700 ease-out relative overflow-hidden"
-        style={{ width: ${pct}% }}
+        style={{ width: '${pct}%' }}
       >
         <div className="absolute inset-0 shimmer-bg animate-shimmer" />
       </div>
@@ -239,7 +239,7 @@ export function StatCard({
 
         {icon && (
           <div
-            className={shrink-0 h-11 w-11 rounded-xl bg-gradient-to-br ${accents[accent]} flex items-center justify-center shadow-glow-saffron}
+            className={'shrink-0 h-11 w-11 rounded-xl bg-gradient-to-br ${accents[accent]} flex items-center justify-center shadow-glow-saffron'}
           >
             {icon}
           </div>
