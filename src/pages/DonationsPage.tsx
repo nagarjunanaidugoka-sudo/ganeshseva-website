@@ -74,6 +74,7 @@ export function DonationsPage() {
   const [method, setMethod] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('receipt_asc');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Donation | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -98,19 +99,57 @@ export function DonationsPage() {
     setTimeout(() => setToasts((ts) => ts.filter((t) => t.id !== id)), 4000);
   }
 
-  const filtered = useMemo(() => {
-    return donations.filter((d) => {
-      const q = query.toLowerCase();
-      const matchesQuery =
-        d.donor_name.toLowerCase().includes(q) ||
-        (d.father_name ?? '').toLowerCase().includes(q) ||
-        d.receipt_no.toLowerCase().includes(q) ||
-        d.purpose.toLowerCase().includes(q) ||
-        (d.phone ?? '').toLowerCase().includes(q) ||
-        (d.transaction_id ?? '').toLowerCase().includes(q);
-      const matchesMethod = method === 'all' || d.method === method;
-      const matchesStatus = statusFilter === 'all' || d.payment_status === statusFilter;
-      const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
+const filtered = useMemo(() => {
+  const result = donations.filter((d) => {
+    const q = query.toLowerCase();
+
+    const matchesQuery =
+      d.donor_name.toLowerCase().includes(q) ||
+      (d.father_name ?? '').toLowerCase().includes(q) ||
+      d.receipt_no.toLowerCase().includes(q) ||
+      d.purpose.toLowerCase().includes(q) ||
+      (d.phone ?? '').toLowerCase().includes(q) ||
+      (d.transaction_id ?? '').toLowerCase().includes(q);
+
+    const matchesMethod = method === 'all' || d.method === method;
+    const matchesStatus = statusFilter === 'all' || d.payment_status === statusFilter;
+    const matchesCategory = categoryFilter === 'all' || d.category === categoryFilter;
+
+    return matchesQuery && matchesMethod && matchesStatus && matchesCategory;
+  });
+
+  return [...result].sort((a, b) => {
+    switch (sortBy) {
+      case 'receipt_desc':
+        return b.receipt_no.localeCompare(a.receipt_no, undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        });
+
+      case 'date_desc':
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+
+      case 'date_asc':
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+
+      case 'amount_desc':
+        return b.amount - a.amount;
+
+      case 'amount_asc':
+        return a.amount - b.amount;
+
+      case 'name_asc':
+        return a.donor_name.localeCompare(b.donor_name);
+
+      case 'receipt_asc':
+      default:
+        return a.receipt_no.localeCompare(b.receipt_no, undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        });
+    }
+  });
+}, [donations, query, method, statusFilter, categoryFilter, sortBy]);
       return matchesQuery && matchesMethod && matchesStatus && matchesCategory;
     });
   }, [donations, query, method, statusFilter, categoryFilter]);
@@ -416,6 +455,18 @@ export function DonationsPage() {
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
+          <select
+  value={sortBy}
+  onChange={(e) => setSortBy(e.target.value)}
+>
+  <option value="receipt_asc">Receipt No. — Low to High</option>
+  <option value="receipt_desc">Receipt No. — High to Low</option>
+  <option value="date_desc">Date — Newest First</option>
+  <option value="date_asc">Date — Oldest First</option>
+  <option value="amount_desc">Amount — High to Low</option>
+  <option value="amount_asc">Amount — Low to High</option>
+  <option value="name_asc">Donor Name — A to Z</option>
+</select>
           <div className="relative">
             <button onClick={() => setExportOpen(o => !o)} className="btn-outline px-4 py-2.5 text-sm flex items-center gap-2">
               <Download className="w-4 h-4" /> Export
