@@ -36,8 +36,30 @@ export function DashboardPage() {
   const bal = currentBalance(donations, expenses);
   const goal = settings?.donation_goal ?? 0;
   const goalPct = goal > 0 ? Math.round((td / goal) * 100) : 0;
-  const recentDonations = donations.slice(0, 5);
-  const recentExpenses = expenses.slice(0, 5);
+  const recentDonations = [...donations]
+  .sort((a, b) =>
+    b.receipt_no.localeCompare(
+      a.receipt_no,
+      undefined,
+      {
+        numeric: true,
+        sensitivity: 'base',
+      }
+    )
+  )
+  .slice(0, 5);
+  const recentExpenses = [...expenses]
+  .sort((a, b) =>
+    b.receipt_no.localeCompare(
+      a.receipt_no,
+      undefined,
+      {
+        numeric: true,
+        sensitivity: 'base',
+      }
+    )
+  )
+  .slice(0, 5);
 
   return (
     <div className="space-y-8 pb-10">
