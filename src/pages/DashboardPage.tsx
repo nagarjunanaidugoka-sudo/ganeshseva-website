@@ -48,18 +48,7 @@ export function DashboardPage() {
     )
   )
   .slice(0, 5);
-  const recentExpenses = [...expenses]
-  .sort((a, b) =>
-    b.receipt_no.localeCompare(
-      a.receipt_no,
-      undefined,
-      {
-        numeric: true,
-        sensitivity: 'base',
-      }
-    )
-  )
-  .slice(0, 5);
+  const recentExpenses = expenses.slice(0, 5);
 
   return (
     <div className="space-y-8 pb-10">
