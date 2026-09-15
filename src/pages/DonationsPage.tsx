@@ -77,8 +77,17 @@ function sortDonations(data: Donation[], sortBy: SortOption): Donation[] {
       case 'name_asc':
         return a.donor_name.localeCompare(b.donor_name, undefined, { sensitivity: 'base' });
       case 'receipt_asc':
-      default:
-        return a.receipt_no.localeCompare(b.receipt_no, undefined, { numeric: true, sensitivity: 'base' });
+  return a.receipt_no.localeCompare(b.receipt_no, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
+
+case 'receipt_desc':
+default:
+  return b.receipt_no.localeCompare(a.receipt_no, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
     }
   });
 }
@@ -90,7 +99,7 @@ export function DonationsPage() {
   const [method, setMethod] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<SortOption>('receipt_asc');
+  const [sortBy, setSortBy] = useState<SortOption>('receipt_desc');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Donation | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
