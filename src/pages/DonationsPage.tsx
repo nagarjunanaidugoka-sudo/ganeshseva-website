@@ -1479,11 +1479,7 @@ export function DonationsPage() {
               </p>
 
               <p className="text-sm text-maroon-500 dark:text-cream/60 mt-1">
-                {deleteTarget?.donor_name} 鈥攞' '}
-                {deleteTarget
-                  ? formatINR(deleteTarget.amount)
-                  : ''}{' '}
-                ({deleteTarget?.receipt_no})
+                {deleteTarget?.donor_name} 鈥� {deleteTarget ? formatINR(deleteTarget.amount) : ''} ({deleteTarget?.receipt_no})
               </p>
 
               <p className="text-xs text-red-500 mt-2">
@@ -1519,4 +1515,4 @@ export function DonationsPage() {
       </Modal>
     </div>
   );
-      }
+}
